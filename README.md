@@ -1,153 +1,155 @@
 # ErrorCode
 
-A unified error code definition library for embedded C programming.
+[English](README_EN.md) | 中文
 
-## Overview
+统一嵌入式程序设计中的返回值错误码定义库。
 
-This library provides a structured error code system for standardizing return value handling in embedded C projects. The layered design gives each error code a clear module affiliation and error category, making issue localization and debugging straightforward.
+## 概述
 
-## Error Code Design
+本库提供了一套结构化的错误码定义系统，用于统一嵌入式 C 项目中的函数返回值处理。通过分层设计，使错误码具有清晰的模块归属和错误类别，便于问题定位和调试。
 
-### Design Principles
+## 错误码设计
 
-1. **Layered Structure**: `Module(8bit) | Category(4bit) | Specific Error(12bit)`
-2. **Zero is Success**: `0` indicates success, non-zero indicates an error
-3. **Uniqueness**: Each error code is globally unique
-4. **Extensibility**: Ample module and error code space is reserved
+### 设计原则
 
-### Error Code Format
+1. **分层设计**：采用 `模块(8bit) | 类别(4bit) | 具体错误(12bit)` 的三层结构
+2. **零值成功**：`0` 表示成功，非零表示错误
+3. **唯一性**：每个错误码在全局范围内唯一
+4. **可扩展性**：预留充足的模块和错误编码空间
+
+### 错误码格式
 
 ```
 0xMCCCEEEE
 │ │   │
-│ │   └─ EEEE: Specific error (12 bit, 0x000-0xFFF)
-│ └───── CC:   Category      (4 bit, 0x0-0xF)
-└─────── M:    Module        (8 bit, 0x00-0xFF)
+│ │   └─ EEEE: 具体错误码 (12 bit, 0x000-0xFFF)
+│ └───── CC:   错误类别   (4 bit, 0x0-0xF)
+└─────── M:    模块标识   (8 bit, 0x00-0xFF)
 ```
 
-### Module Definitions
+### 模块定义 (Module)
 
-| Module | Value | Description |
-|--------|-------|-------------|
-| `APP_ERR_MODULE_SYSTEM`   | 0x00 | General system |
-| `APP_ERR_MODULE_COMM`     | 0x01 | Communication |
-| `APP_ERR_MODULE_PROTOCOL` | 0x02 | Protocol handling |
-| `APP_ERR_MODULE_UART`     | 0x03 | UART driver |
-| `APP_ERR_MODULE_TIMER`    | 0x04 | Timer |
-| `APP_ERR_MODULE_IO`       | 0x05 | I/O control |
-| `APP_ERR_MODULE_MEMORY`   | 0x06 | Memory management |
-| `APP_ERR_MODULE_TASK`     | 0x07 | Task scheduling |
-| `APP_ERR_MODULE_SENSOR`   | 0x08 | Sensor |
-| `APP_ERR_MODULE_USER`     | 0xFF | User-defined |
+| 模块标识 | 值 | 说明 |
+|---------|-----|------|
+| `APP_ERR_MODULE_SYSTEM`   | 0x00 | 系统通用 |
+| `APP_ERR_MODULE_COMM`     | 0x01 | 通信模块 |
+| `APP_ERR_MODULE_PROTOCOL` | 0x02 | 协议处理 |
+| `APP_ERR_MODULE_UART`     | 0x03 | 串口驱动 |
+| `APP_ERR_MODULE_TIMER`    | 0x04 | 定时器 |
+| `APP_ERR_MODULE_IO`       | 0x05 | IO控制 |
+| `APP_ERR_MODULE_MEMORY`   | 0x06 | 内存管理 |
+| `APP_ERR_MODULE_TASK`     | 0x07 | 任务调度 |
+| `APP_ERR_MODULE_SENSOR`   | 0x08 | 传感器模块 |
+| `APP_ERR_MODULE_USER`     | 0xFF | 用户自定义 |
 
-### Category Definitions
+### 类别定义 (Category)
 
-| Category | Value | Description |
-|----------|-------|-------------|
-| `APP_ERR_CATEGORY_SUCCESS`  | 0x0 | Success |
-| `APP_ERR_CATEGORY_PARAM`    | 0x1 | Parameter error |
-| `APP_ERR_CATEGORY_STATE`    | 0x2 | State error |
-| `APP_ERR_CATEGORY_TIMEOUT`  | 0x3 | Timeout |
-| `APP_ERR_CATEGORY_BUSY`     | 0x4 | Busy / resource occupied |
-| `APP_ERR_CATEGORY_NOMEM`    | 0x5 | Out of memory |
-| `APP_ERR_CATEGORY_IO`       | 0x6 | I/O error |
-| `APP_ERR_CATEGORY_CHECKSUM` | 0x7 | Checksum error |
-| `APP_ERR_CATEGORY_PROTOCOL` | 0x8 | Protocol error |
-| `APP_ERR_CATEGORY_HARDWARE` | 0x9 | Hardware error |
-| `APP_ERR_CATEGORY_INTERNAL` | 0xA | Internal error |
+| 类别标识 | 值 | 说明 |
+|---------|-----|------|
+| `APP_ERR_CATEGORY_SUCCESS`  | 0x0 | 成功 |
+| `APP_ERR_CATEGORY_PARAM`    | 0x1 | 参数错误 |
+| `APP_ERR_CATEGORY_STATE`    | 0x2 | 状态错误 |
+| `APP_ERR_CATEGORY_TIMEOUT`  | 0x3 | 超时错误 |
+| `APP_ERR_CATEGORY_BUSY`     | 0x4 | 忙碌/资源占用 |
+| `APP_ERR_CATEGORY_NOMEM`    | 0x5 | 内存不足 |
+| `APP_ERR_CATEGORY_IO`       | 0x6 | IO错误 |
+| `APP_ERR_CATEGORY_CHECKSUM` | 0x7 | 校验错误 |
+| `APP_ERR_CATEGORY_PROTOCOL` | 0x8 | 协议错误 |
+| `APP_ERR_CATEGORY_HARDWARE` | 0x9 | 硬件错误 |
+| `APP_ERR_CATEGORY_INTERNAL` | 0xA | 内部错误 |
 
-## API Reference
+## API 接口
 
-### Type Definition
+### 类型定义
 
 ```c
 typedef uint32_t app_err_t;
 ```
 
-### Utility Macros
+### 判断宏
 
-| Macro | Description |
-|-------|-------------|
-| `APP_ERR_SUCCESS(code)` | Check if the code indicates success |
-| `APP_ERR_FAILED(code)` | Check if the code indicates failure |
-| `APP_ERR_GET_MODULE(code)` | Extract the module identifier |
-| `APP_ERR_GET_CATEGORY(code)` | Extract the category identifier |
+| 宏 | 说明 |
+|---|---|
+| `APP_ERR_SUCCESS(code)` | 判断是否成功 |
+| `APP_ERR_FAILED(code)` | 判断是否失败 |
+| `APP_ERR_GET_MODULE(code)` | 提取模块标识 |
+| `APP_ERR_GET_CATEGORY(code)` | 提取类别标识 |
 
-### Functions
+### 函数接口
 
-| Function | Description |
-|----------|-------------|
-| `app_Err_ToString(errCode)` | Get the error code name string |
-| `app_Err_GetDescription(errCode)` | Get the error description string |
-| `app_Err_IsModule(errCode, module)` | Check if the error belongs to a given module |
-| `app_Err_IsCategory(errCode, category)` | Check if the error belongs to a given category |
-| `app_Err_IsRecoverable(errCode)` | Check if the error is recoverable |
+| 函数 | 说明 |
+|------|------|
+| `app_Err_ToString(errCode)` | 获取错误码名称字符串 |
+| `app_Err_GetDescription(errCode)` | 获取错误详细描述 |
+| `app_Err_IsModule(errCode, module)` | 判断是否属于指定模块 |
+| `app_Err_IsCategory(errCode, category)` | 判断是否属于指定类别 |
+| `app_Err_IsRecoverable(errCode)` | 判断错误是否可恢复 |
 
-## Common Error Codes
+## 常用错误码
 
-### System Errors
+### 系统通用错误
 
-| Error Code | Value | Description |
-|------------|-------|-------------|
-| `APP_ERR_OK` | 0x00000000 | Success |
-| `APP_ERR_NULL_PTR` | 0x00100101 | Null pointer |
-| `APP_ERR_INVALID_PARAM` | 0x00100102 | Invalid parameter |
-| `APP_ERR_NOT_INIT` | 0x00200101 | Not initialized |
-| `APP_ERR_ALREADY_INIT` | 0x00200102 | Already initialized |
-| `APP_ERR_NOT_SUPPORTED` | 0x00100103 | Not supported |
-| `APP_ERR_NO_MEMORY` | 0x00500101 | Out of memory |
-| `APP_ERR_TIMEOUT` | 0x00300101 | Timeout |
-| `APP_ERR_BUSY` | 0x00400101 | Resource busy |
-| `APP_ERR_FAIL` | 0x00A00101 | Generic failure |
-| `APP_ERR_UNKNOWN` | 0x00A00102 | Unknown error |
+| 错误码 | 值 | 说明 |
+|-------|-----|------|
+| `APP_ERR_OK` | 0x00000000 | 成功 |
+| `APP_ERR_NULL_PTR` | 0x00100101 | 空指针 |
+| `APP_ERR_INVALID_PARAM` | 0x00100102 | 无效参数 |
+| `APP_ERR_NOT_INIT` | 0x00200101 | 未初始化 |
+| `APP_ERR_ALREADY_INIT` | 0x00200102 | 重复初始化 |
+| `APP_ERR_NOT_SUPPORTED` | 0x00100103 | 不支持的功能 |
+| `APP_ERR_NO_MEMORY` | 0x00500101 | 内存不足 |
+| `APP_ERR_TIMEOUT` | 0x00300101 | 超时 |
+| `APP_ERR_BUSY` | 0x00400101 | 忙碌 |
+| `APP_ERR_FAIL` | 0x00A00101 | 通用失败 |
+| `APP_ERR_UNKNOWN` | 0x00A00102 | 未知错误 |
 
-### Communication Errors
+### 通信模块错误
 
-| Error Code | Description |
-|------------|-------------|
-| `APP_ERR_COMM_NOT_INIT` | Communication not initialized |
-| `APP_ERR_COMM_TX_BUSY` | Transmit busy |
-| `APP_ERR_COMM_QUEUE_FULL` | Transmit queue full |
-| `APP_ERR_COMM_PAYLOAD_TOO_LARGE` | Payload too large |
-| `APP_ERR_COMM_INVALID_UART` | Invalid UART port |
-| `APP_ERR_COMM_SEND_FAIL` | Send failed |
+| 错误码 | 说明 |
+|-------|------|
+| `APP_ERR_COMM_NOT_INIT` | 通信未初始化 |
+| `APP_ERR_COMM_TX_BUSY` | 发送忙碌 |
+| `APP_ERR_COMM_QUEUE_FULL` | 发送队列满 |
+| `APP_ERR_COMM_PAYLOAD_TOO_LARGE` | 负载过大 |
+| `APP_ERR_COMM_INVALID_UART` | 无效串口号 |
+| `APP_ERR_COMM_SEND_FAIL` | 发送失败 |
 
-### Protocol Errors
+### 协议模块错误
 
-| Error Code | Description |
-|------------|-------------|
-| `APP_ERR_PROTO_FRAME_TIMEOUT` | Frame timeout |
-| `APP_ERR_PROTO_CRC_ERROR` | CRC error |
-| `APP_ERR_PROTO_INVALID_STATE` | Invalid state |
-| `APP_ERR_PROTO_BUFFER_OVERFLOW` | Buffer overflow |
-| `APP_ERR_PROTO_INVALID_FRAME` | Invalid frame format |
-| `APP_ERR_PROTO_INCOMPLETE_FRAME` | Incomplete frame |
-| `APP_ERR_PROTO_ESCAPE_ERROR` | Escape error |
+| 错误码 | 说明 |
+|-------|------|
+| `APP_ERR_PROTO_FRAME_TIMEOUT` | 帧超时 |
+| `APP_ERR_PROTO_CRC_ERROR` | CRC错误 |
+| `APP_ERR_PROTO_INVALID_STATE` | 无效状态 |
+| `APP_ERR_PROTO_BUFFER_OVERFLOW` | 缓冲区溢出 |
+| `APP_ERR_PROTO_INVALID_FRAME` | 无效帧格式 |
+| `APP_ERR_PROTO_INCOMPLETE_FRAME` | 不完整帧 |
+| `APP_ERR_PROTO_ESCAPE_ERROR` | 转义错误 |
 
-### UART Errors
+### 串口模块错误
 
-| Error Code | Description |
-|------------|-------------|
-| `APP_ERR_UART_NOT_INIT` | UART not initialized |
-| `APP_ERR_UART_TX_BUSY` | Transmit busy |
-| `APP_ERR_UART_TX_TIMEOUT` | Transmit timeout |
-| `APP_ERR_UART_RX_ERROR` | Receive error |
-| `APP_ERR_UART_DMA_ERROR` | DMA error |
-| `APP_ERR_UART_INVALID_CH` | Invalid channel |
-| `APP_ERR_UART_BUFFER_FULL` | Buffer full |
+| 错误码 | 说明 |
+|-------|------|
+| `APP_ERR_UART_NOT_INIT` | 串口未初始化 |
+| `APP_ERR_UART_TX_BUSY` | 发送忙碌 |
+| `APP_ERR_UART_TX_TIMEOUT` | 发送超时 |
+| `APP_ERR_UART_RX_ERROR` | 接收错误 |
+| `APP_ERR_UART_DMA_ERROR` | DMA错误 |
+| `APP_ERR_UART_INVALID_CH` | 无效通道 |
+| `APP_ERR_UART_BUFFER_FULL` | 缓冲区满 |
 
-### Sensor Errors
+### 传感器模块错误
 
-| Error Code | Description |
-|------------|-------------|
-| `APP_ERR_SENSOR_NOT_RESPONDING` | Sensor not responding |
-| `APP_ERR_SENSOR_INVALID_DATA` | Invalid data |
-| `APP_ERR_SENSOR_CHECKSUM` | Checksum failed |
-| `APP_ERR_SENSOR_NOT_FOUND` | Sensor not found |
+| 错误码 | 说明 |
+|-------|------|
+| `APP_ERR_SENSOR_NOT_RESPONDING` | 传感器无响应 |
+| `APP_ERR_SENSOR_INVALID_DATA` | 无效数据 |
+| `APP_ERR_SENSOR_CHECKSUM` | 校验失败 |
+| `APP_ERR_SENSOR_NOT_FOUND` | 传感器未找到 |
 
-## Usage Examples
+## 使用示例
 
-### Basic Usage
+### 基本用法
 
 ```c
 #include "appErrorCode.h"
@@ -165,7 +167,7 @@ app_err_t my_function(void *param)
     return APP_ERR_OK;
 }
 
-// Caller
+// 调用处理
 app_err_t ret = my_function(ptr);
 if (APP_ERR_FAILED(ret)) {
     printf("Error: %s - %s\n",
@@ -174,33 +176,34 @@ if (APP_ERR_FAILED(ret)) {
 }
 ```
 
-### Module and Category Inspection
+### 模块和类别判断
 
 ```c
 app_err_t ret = some_comm_function();
 
 if (APP_ERR_FAILED(ret)) {
-    // Check if it's a communication module error
+    // 判断是否为通信模块错误
     if (app_Err_IsModule(ret, APP_ERR_MODULE_COMM)) {
         printf("Communication module error\n");
     }
 
-    // Check if it's a timeout error
+    // 判断是否为超时错误
     if (app_Err_IsCategory(ret, APP_ERR_CATEGORY_TIMEOUT)) {
         printf("Timeout occurred, retrying...\n");
     }
 
-    // Check if recoverable
+    // 判断是否可恢复
     if (app_Err_IsRecoverable(ret)) {
+        // 重试逻辑
         retry();
     }
 }
 ```
 
-### Custom Error Codes
+### 自定义错误码
 
 ```c
-// Define a custom module and error codes
+// 定义自定义模块和错误码
 #define MY_ERR_MODULE 0x09000000U
 
 #define MY_ERR_CUSTOM_FAIL (MY_ERR_MODULE | APP_ERR_CATEGORY_INTERNAL | 0x001)
@@ -211,44 +214,44 @@ app_err_t my_custom_function(void)
 }
 ```
 
-## Adding a New Module
+## 扩展新模块
 
-Follow this template to add error codes for a new module:
+添加新模块的错误码，按照以下模板：
 
 ```c
-/* In appErrorCode.h */
+/* 在 appErrorCode.h 中添加 */
 
-// 1. Define the module identifier (use an unoccupied module number)
-#define APP_ERR_MODULE_MYNEW 0x09000000U
+// 1. 定义模块标识（如果需要新模块）
+#define APP_ERR_MODULE_MYNEW 0x09000000U  // 使用未占用的模块号
 
-// 2. Define specific error codes
+// 2. 定义具体错误码
 #define APP_ERR_MYNEW_ERROR1 (APP_ERR_MODULE_MYNEW | APP_ERR_CATEGORY_STATE | 0x001)
 #define APP_ERR_MYNEW_ERROR2 (APP_ERR_MODULE_MYNEW | APP_ERR_CATEGORY_TIMEOUT | 0x001)
 
-/* In appErrorCode.c — add entries to s_errorTable */
+/* 在 appErrorCode.c 的 s_errorTable 中添加条目 */
 {APP_ERR_MYNEW_ERROR1, "APP_ERR_MYNEW_ERROR1", "Description here"},
 {APP_ERR_MYNEW_ERROR2, "APP_ERR_MYNEW_ERROR2", "Description here"},
 ```
 
-## Recoverable Errors
+## 可恢复错误
 
-The following errors are considered recoverable (retry is recommended):
+以下错误被定义为可恢复错误（可重试）：
 
-- `APP_ERR_TIMEOUT` — General timeout
-- `APP_ERR_BUSY` — Resource busy
-- `APP_ERR_COMM_TX_BUSY` — Communication transmit busy
-- `APP_ERR_COMM_QUEUE_FULL` — Communication queue full
-- `APP_ERR_UART_TX_BUSY` — UART transmit busy
-- `APP_ERR_UART_TX_TIMEOUT` — UART transmit timeout
-- `APP_ERR_PROTO_FRAME_TIMEOUT` — Protocol frame timeout
+- `APP_ERR_TIMEOUT` - 通用超时
+- `APP_ERR_BUSY` - 资源忙碌
+- `APP_ERR_COMM_TX_BUSY` - 通信发送忙碌
+- `APP_ERR_COMM_QUEUE_FULL` - 通信队列满
+- `APP_ERR_UART_TX_BUSY` - UART发送忙碌
+- `APP_ERR_UART_TX_TIMEOUT` - UART发送超时
+- `APP_ERR_PROTO_FRAME_TIMEOUT` - 协议帧超时
 
-## Files
+## 文件说明
 
-| File | Description |
-|------|-------------|
-| [appErrorCode.h](appErrorCode.h) | Error code definitions (header) |
-| [appErrorCode.c](appErrorCode.c) | Error code implementation |
+| 文件 | 说明 |
+|------|------|
+| [appErrorCode.h](appErrorCode.h) | 错误码定义头文件 |
+| [appErrorCode.c](appErrorCode.c) | 错误码实现文件 |
 
-## License
+## 许可证
 
-This project is licensed under the terms found in the [LICENSE](LICENSE) file.
+本项目采用开源许可证，具体请参阅 [LICENSE](LICENSE) 文件。
